@@ -1,7 +1,7 @@
 # django imports
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -18,7 +18,7 @@ class Review(models.Model):
 
     # if the user is authenticated we save the user otherwise the name and the
     # email.
-    user = models.ForeignKey(User, verbose_name=_(u"User"), blank=True, null=True, related_name="%(class)s_comments")
+    user = models.ForeignKey(get_user_model(), verbose_name=_(u"User"), blank=True, null=True, related_name="%(class)s_comments")
     session_id = models.CharField(_(u"Session ID"), blank=True, max_length=50)
 
     user_name = models.CharField(_(u"Name"), max_length=50, blank=True)
