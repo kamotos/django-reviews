@@ -145,7 +145,7 @@ def save(request):
         # Save object within session
         ctype = ContentType.objects.get_for_id(new_review.content_type_id)
         object = ctype.get_object_for_this_type(pk=new_review.content_id)
-        request.session["last-rated-object"] = object
+        request.session["last-rated-object"] = new_review.content_type_id, object.id
 
         return HttpResponseRedirect(reverse("reviews_thank_you"))
 
@@ -176,7 +176,10 @@ def thank_you(request, template_name="reviews/thank_you.html"):
     """Displays a thank you page.
     """
     if request.session.has_key("last-rated-object"):
-        object = request.session.get("last-rated-object")
+        ct_id, object_id = request.session.get("last-rated-object")
+        ct = ContentType.objects.get(id=ct_id)
+        object = ct.get_object_for_this_type(id=object_id)
+
         del request.session["last-rated-object"]
     else:
         object = None
