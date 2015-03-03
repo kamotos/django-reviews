@@ -1,4 +1,5 @@
 # django imports
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -9,16 +10,24 @@ from django.utils.translation import ugettext_lazy as _
 from reviews.managers import ActiveManager
 from reviews.settings import SCORE_CHOICES
 
+try:
+    USER_MODEL = get_user_model()
+except Exception, e:
+    if e.__class__.__name__ == "AppRegistryNotReady":
+        USER_MODEL = settings.AUTH_USER_MODEL
+    else:
+        raise e
+
 class Review(models.Model):
     """A ``Review`` consists on a comment and a rating.
     """
-    content_type   = models.ForeignKey(ContentType, verbose_name=_(u"Content type"), related_name="content_type_set_for_%(class)s")
+    content_type = models.ForeignKey(ContentType, verbose_name=_(u"Content type"), related_name="content_type_set_for_%(class)s")
     content_id = models.PositiveIntegerField(_(u"Content ID"), blank=True, null=True)
     content = generic.GenericForeignKey(ct_field="content_type", fk_field="content_id")
 
     # if the user is authenticated we save the user otherwise the name and the
     # email.
-    user = models.ForeignKey(get_user_model(), verbose_name=_(u"User"), blank=True, null=True, related_name="%(class)s_comments")
+    user = models.ForeignKey(USER_MODEL, verbose_name=_(u"User"), blank=True, null=True, related_name="%(class)s_comments")
     session_id = models.CharField(_(u"Session ID"), blank=True, max_length=50)
 
     user_name = models.CharField(_(u"Name"), max_length=50, blank=True)
